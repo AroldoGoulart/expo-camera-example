@@ -1,31 +1,37 @@
-import React, { useEffect } from 'react';
+import { useIsFocused } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
 import { View, Animated, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
 
 function ProgressBar(props) {
+  const isFocused = useIsFocused()
   const { animationStyle, isRecording, video, cancelMedia, onEnd } = props;
-  let { progressText } = props;
 
+  const [progressText2, setProgressText2] = useState(props.progressText)
   const videoIsReady = !isRecording && !!(video && video.uri);
-  progressText = (!isRecording && !(video && video.uri) && !progressText) ? '...' : progressText;
+
+  useEffect(() => {
+    const progressText = (!isRecording && !(video && video.uri) && !props.progressText2) ? '...' : progressText2;
+    setProgressText2(progressText)
+  }, [isRecording, video])
 
   if (!isRecording && !(video && video.uri)) {
     return null;
   }
 
   useEffect(() => {
-    if (videoIsReady && progressText <= 0) {
+    if (videoIsReady && progressText2 <= 0) {
       onEnd()
     }
   }, [videoIsReady])
 
   return (
-    <View style={styles.container}>
+    <View key={progressText2} style={styles.container}>
       <Animated.View style={[styles.wrapper, animationStyle]}>
         {!videoIsReady ? (
           <View style={styles.textWrapper}>
-            <Text style={styles.text}>
-              {progressText}
+            <Text key={`${progressText2}_text`} style={styles.text}>
+              {progressText2}
             </Text>
           </View>
         ) : (

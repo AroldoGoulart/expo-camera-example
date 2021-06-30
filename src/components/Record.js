@@ -15,6 +15,7 @@ const initial_state = {
   progressText: VIDEO_DURATION / 1000,
   pause: false
 }
+
 export default class Record extends React.Component {
   constructor() {
     super();
@@ -57,8 +58,7 @@ export default class Record extends React.Component {
   stopSound() {
     this.props.stopSound()
   }
-
-  
+    
   handleCameraRef(ref) {
     this.camera = ref;
   }
@@ -129,11 +129,16 @@ export default class Record extends React.Component {
 
         const video = await this.camera.recordAsync(VIDEO_CAMERA_OPTIONS)
 
+        console.log("when stop...")
         this.stopSound()
         this.isRecording = false;
 
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        this.setState({ videoIsLoading: false, isRecording: false, video });
+        this.setState({ videoIsLoading: false, isRecording: false, video },
+          () => {
+            console.log("Opa deu certo", this.state)
+          }
+        );
       })
     }
   }
@@ -177,6 +182,8 @@ export default class Record extends React.Component {
     this.updateProgressText = this.updateProgressText.bind(this);
     this.startCountdown = this.startCountdown.bind(this);
 
+    this.camera.stopRecording()
+    
     this.setState({ ...initial_state })
   }
 
@@ -188,8 +195,13 @@ export default class Record extends React.Component {
 
   pauseVideo() {
       this.camera.pausePreview()
+      this.stopSound()
       this.setState({ pause: true })
       this.handlerAnimation(true)
+  }
+
+  stopRecord() {
+      this.camera.stopRecording()
   }
 
   render() {
@@ -208,13 +220,13 @@ export default class Record extends React.Component {
         />
 
         <ProgressBar
-          video={video}
-          isRecording={isRecording}
+          video={this.state.video}
+          isRecording={this.state.isRecording}
           animationStyle={this.animationStyle()}
-          progressText={progressText}
+          progressText={this.state.progressText}
           cancelMedia={this.cancelMedia}
-          videoIsLoading={videoIsLoading}
-          //key={`${isRecording}_${VIDEO_DURATION}`}
+          videoIsLoading={this.state.videoIsLoading}
+          key={`${this.state.progressText}_${isRecording}_${this.state.VIDEO_DURATION}_${this.state.video}`}
           onEnd={() => {
             this.props.navigation.dispatch(
               CommonActions.navigate({
@@ -252,6 +264,8 @@ export default class Record extends React.Component {
           <Text>Resume</Text>
         </TouchableOpacity>
 
+        
+
         <TouchableOpacity 
           style={{
             position: 'absolute',
@@ -263,6 +277,20 @@ export default class Record extends React.Component {
         >
           <Text>Reset</Text>
         </TouchableOpacity>
+
+
+        <TouchableOpacity 
+          style={{
+            position: 'absolute',
+            top: 50*3,
+            backgroundColor: "#fff",
+            padding: 10,
+          }} 
+          onPress={() => this.stopRecord()}
+        >
+          <Text>Stop</Text>
+        </TouchableOpacity>
+
 
         <CameraOverlay
           onPress={() => this.onRecordVideo()}

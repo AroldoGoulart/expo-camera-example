@@ -5,5 +5,5 @@ export const VIDEO_CAMERA_OPTIONS = {
     mute: false,
     mirrorVideo: true,
     fps: 60,
-    maxDuration: VIDEO_DURATION / 1000
+    //maxDuration: VIDEO_DURATION / 1000
 }
